@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Handler;
@@ -33,8 +34,8 @@ public class AudioNotificationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        musicLocation = new ArrayList<>();
-        musicTitle=new ArrayList<>();
+        //musicLocation = new ArrayList<>();
+        //musicTitle=new ArrayList<>();
         //mediaPlayer = MediaPlayer.create(AudioNotificationService.this, musicList.get(count));
         handler = new Handler(Looper.getMainLooper());
         intentTime = new Intent("sent");
@@ -45,15 +46,20 @@ public class AudioNotificationService extends Service {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                musicLocation=intent.getStringArrayListExtra("MUSIC_LOCATION");
+                musicTitle=intent.getStringArrayListExtra("MUSIC_TITLE");
 
                 switch (intent.getAction()) {
                     case StatesPlayer.PLAY:
                         try {
+                            mediaPlayer=new MediaPlayer();
                             mediaPlayer.setDataSource(musicLocation.get(0));
+                            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                            mediaPlayer.prepare();
+                            mediaPlayer.start();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        mediaPlayer.start();
                         intentTime.putExtra("Duration", mediaPlayer.getDuration());
                         LocalBroadcastManager.getInstance(AudioNotificationService.this).sendBroadcast(intentTime);
                         handler.postDelayed(updateSeekBar, 0);
@@ -62,22 +68,22 @@ public class AudioNotificationService extends Service {
                         mediaPlayer.pause();
                         break;
                     case StatesPlayer.NEXT:
-                        if (count < musicList.size() - 1) {
+                        if (count < musicLocation.size() - 1) {
                             mediaPlayer.stop();
-                            mediaPlayer = MediaPlayer.create(AudioNotificationService.this, musicList.get(++count));
-                            intentTime.putExtra("Duration", mediaPlayer.getDuration());
-                            LocalBroadcastManager.getInstance(AudioNotificationService.this).sendBroadcast(intentTime);
-                            mediaPlayer.start();
+//                            mediaPlayer = MediaPlayer.create(AudioNotificationService.this, musicLocation.get(++count));
+//                            intentTime.putExtra("Duration", mediaPlayer.getDuration());
+//                            LocalBroadcastManager.getInstance(AudioNotificationService.this).sendBroadcast(intentTime);
+//                            mediaPlayer.start();
                         }
                         break;
 
                     case StatesPlayer.PREVIOUS:
                         if (count != 0) {
                             mediaPlayer.stop();
-                            mediaPlayer = MediaPlayer.create(AudioNotificationService.this, musicList.get(--count));
-                            intentTime.putExtra("Duration", mediaPlayer.getDuration());
-                            LocalBroadcastManager.getInstance(AudioNotificationService.this).sendBroadcast(intentTime);
-                            mediaPlayer.start();
+//                            mediaPlayer = MediaPlayer.create(AudioNotificationService.this, musicLocation.get(--count));
+//                            intentTime.putExtra("Duration", mediaPlayer.getDuration());
+//                            LocalBroadcastManager.getInstance(AudioNotificationService.this).sendBroadcast(intentTime);
+//                            mediaPlayer.start();
                         }
                         break;
 
@@ -101,14 +107,14 @@ public class AudioNotificationService extends Service {
             handler.postDelayed(this, 1000);
             if (mediaPlayer.getCurrentPosition() > mediaPlayer.getDuration()) {
                 handler.removeCallbacks(this);
-                if (count < musicList.size()&& count<musicList.size()-1) {
-                    mediaPlayer.stop();
-                    mediaPlayer = MediaPlayer.create(AudioNotificationService.this, musicList.get(++count));
-                    intentTime.putExtra("Duration", mediaPlayer.getDuration());
-                    LocalBroadcastManager.getInstance(AudioNotificationService.this).sendBroadcast(intentTime);
-                    mediaPlayer.start();
-                    handler.postDelayed(this, 0);
-                }
+//                if (count < musicList.size()&& count<musicList.size()-1) {
+//                    mediaPlayer.stop();
+//                    mediaPlayer = MediaPlayer.create(AudioNotificationService.this, musicList.get(++count));
+//                    intentTime.putExtra("Duration", mediaPlayer.getDuration());
+//                    LocalBroadcastManager.getInstance(AudioNotificationService.this).sendBroadcast(intentTime);
+//                    mediaPlayer.start();
+//                    handler.postDelayed(this, 0);
+//                }
             }
         }
     };

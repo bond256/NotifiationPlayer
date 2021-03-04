@@ -21,15 +21,19 @@ import android.widget.RemoteViews;
 
 import com.google.android.material.tabs.TabLayout;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
     private static final String CHANNEL_ID = "ForegroundServiceChannel";
+    private ArrayList<String> musicLocation=new ArrayList<>();
+    private ArrayList<String> musicTitle=new ArrayList<>();
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Intent intent= new Intent(this, AudioNotificationService.class);
-        //startService(intent);
+        intent.setAction(StatesPlayer.PLAY);
         TabLayout tabLayout=findViewById(R.id.tabLayout);
         ViewPager viewPager=findViewById(R.id.viewPager);
         PagerAdapter pagerAdapter=new PagerAdapter(getSupportFragmentManager(),2);
@@ -41,10 +45,12 @@ public class MainActivity extends AppCompatActivity {
         int songTitle=cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
         int locSongs=cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
         while (cursor.moveToNext()){
-            String title=cursor.getString(songTitle);
-            String locSong=cursor.getString(locSongs);
-            Log.d("tag", "onCreate: "+title+" / "+locSong);
+            musicLocation.add(cursor.getString(locSongs));
+            musicTitle.add(cursor.getString(songTitle));
         }
+        intent.putExtra("MUSIC_LOCATION",musicLocation);
+        intent.putExtra("MUSIC_TITLE",musicTitle);
+        startService(intent);
 
 //        createNotificationChannel();
 //        RemoteViews remoteViews=new RemoteViews(getPackageName(),R.layout.natification);
